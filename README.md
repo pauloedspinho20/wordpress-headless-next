@@ -40,7 +40,10 @@ Alternatively, you can use some useful Docker tools like Kitematic and/or VSCode
 
 You can run the frontend locally:
 
-    cd frontend && yarn && yarn start
+    cd app
+    cp .env.local.example .env.local
+    yarn
+    yarn dev
 
 Once the containers are running, you can visit the React frontends and backend WordPress admin in your browser.
 

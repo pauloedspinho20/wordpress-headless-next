@@ -26,3 +26,4 @@ services:
             - ./docker/install_wordpress.sh:/usr/local/bin/install_wordpress
             - ./docker/images:/var/www/images
             - ./docker/plugins:/var/www/plugins
+            - ./docker/backup.sql:/var/www/backup.sql
