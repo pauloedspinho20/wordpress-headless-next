@@ -6,26 +6,22 @@ import { getAllExpensesWithSlug } from "@/wp-api/queries/expenses";
 /* GLOBAL */
 
 type GlobalState = {
+  connectedWordpress: boolean;
   categories: ICategory[];
 };
 
 type GlobalAction = {
+  setConnectedWordpress: (connected: boolean) => void;
   updateCategories: (categories: GlobalState["categories"]) => void;
-  toggleCategorySelection: (id: string) => void;
   deselectCategories: () => void;
 };
 
 export const useGlobalStore = create<GlobalState & GlobalAction>()((set) => ({
+  setConnectedWordpress: (connected) =>
+    set(() => ({ connectedWordpress: connected })),
+  connectedWordpress: false,
   categories: [],
   updateCategories: (categories) => set(() => ({ categories: categories })),
-  toggleCategorySelection: (id) =>
-    set((state) => ({
-      categories: state.categories.map((category) =>
-        category.id === id
-          ? { ...category, selected: !category.selected }
-          : category,
-      ),
-    })),
   deselectCategories: () =>
     set((state) => ({
       categories: state.categories.map((category) => ({

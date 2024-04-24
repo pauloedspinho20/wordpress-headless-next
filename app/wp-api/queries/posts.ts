@@ -1,6 +1,8 @@
 import { fetchGraphQL, transformGraphQLResponse } from "../api";
 
 import { ICategory, IPost } from "@/types/posts";
+import { mockCategories } from "../mock";
+
 /*
  * QUERIES - POSTS
  */
@@ -300,10 +302,8 @@ export async function getCategories() {
     data?.categories?.nodes?.map(
       (category: ICategory) => (category.selected = false),
     );
-    /* data.categories.nodes.filter((e) => e.slug !== "uncategorized"); // TODO: Remove Smple Category */
-    console.log("data.categories.nodes", data.categories.nodes);
     return data.categories.nodes as ICategory[];
   }
-
-  return [];
+  /* Return mock categories when Wordpress API is not working */
+  return mockCategories.categories.nodes as ICategory[];
 }

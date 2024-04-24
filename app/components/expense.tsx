@@ -41,6 +41,9 @@ export default function Expense({
   defaultType = "income",
 }: Props) {
   /* Categories state */
+  const connectedWordpress = useGlobalStore(
+    (state) => state.connectedWordpress,
+  );
   const categories = useGlobalStore((state) => state.categories);
   const updateCategories = useGlobalStore((state) => state.updateCategories);
   const [newCategory, setNewCategory] = useState<string>("");
@@ -89,7 +92,6 @@ export default function Expense({
       expense.expense &&
       expense?.categories?.length > 0
     ) {
-      console.log("expense.formatedDate", expense.formatedDate);
       setTitle(expense.title || "");
       validateTitle(expense.title || "");
       setValue(expense.expense.value);
@@ -126,16 +128,28 @@ export default function Expense({
         },
         [],
       );
-
-      const data = await mutateExpense({
-        title,
-        content: "",
-        categories: selectedCategories,
-        formatedDate: selectedDate,
-        value,
-        type,
-        requestType: "create",
-      });
+      let data;
+      if (connectedWordpress) {
+        data = await mutateExpense({
+          title,
+          content: "",
+          categories: selectedCategories,
+          formatedDate: selectedDate,
+          value,
+          type,
+          requestType: "create",
+        });
+      } else {
+        data = {
+          databaseId: Math.floor(Math.random() * 1101),
+          title: title,
+          formatedDate: selectedDate,
+          expense: {
+            value: value,
+            type: type,
+          },
+        };
+      }
 
       if (data) {
         const updatedExpenses = [data, ...expenses];
@@ -183,20 +197,50 @@ export default function Expense({
         [],
       );
 
-      const data = await mutateExpense({
-        databaseId,
-        title,
-        content: "",
-        categories: selectedCategories,
-        formatedDate: selectedDate,
-        value,
-        type,
-        requestType: "update",
-      });
+      let data;
+
+      if (connectedWordpress) {
+        data = await mutateExpense({
+          databaseId,
+          title,
+          content: "",
+          categories: selectedCategories,
+          formatedDate: selectedDate,
+          value,
+          type,
+          requestType: "update",
+        });
+      } else {
+        data = {
+          databaseId: databaseId,
+          title: title,
+          formatedDate: selectedDate,
+          expense: {
+            value: value,
+            type: type,
+          },
+        };
+      }
 
       if (data) {
+        if (connectedWordpress) {
+          getExpenses();
+        } else {
+          const updatedExpenses = expenses.map((e) => {
+            if (e.databaseId === data.databaseId) {
+              return {
+                ...e,
+                title: data.title,
+                formatedDate: data.formatedDate,
+                expense: data.expense,
+              };
+            } else {
+              return e;
+            }
+          });
+          updateExpenses(updatedExpenses);
+        }
         setSent(true);
-        getExpenses();
         updateTotalIncome();
         updateTotalOutcome();
         isDialogOpen(false);

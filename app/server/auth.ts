@@ -54,8 +54,6 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        console.log("creadentiuals", credentials, "req", req);
-
         const res = await LoginUser({
           username: credentials?.username || "",
           password: credentials?.password || "",
@@ -81,8 +79,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      console.log("REDIRECT", url, baseUrl);
+    /*     async redirect({ url, baseUrl }) {
       if (url.startsWith("/"))
         return `${baseUrl}${url}`; // Allows relative callback URLs
       else if (new URL(url).origin === baseUrl) return url; // Allows callback URLs on the same origin
@@ -100,10 +97,9 @@ export const authOptions: NextAuthOptions = {
         // Or you can return a URL to redirect to:
         // return '/unauthorized'
       }
-    },
+    }, */
 
     async jwt({ user, token, account, profile, trigger, session }) {
-      console.log("JWT", user, token, account, profile, trigger, session);
       // Persist the OAuth access_token to the token right after signin
       if (account) {
         token.email = user.email;
@@ -114,7 +110,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token, user }) {
-      console.log("SESSION", session, token, user);
       // Send properties to the client, like an access_token and user id from a provider.
       /*    session.    accessToken = token.accessToken; */
 
@@ -132,13 +127,6 @@ export const authOptions: NextAuthOptions = {
         id: token.sub,
       },
     }), */
-  },
-  pages: {
-    /*     signIn: "/dashboard", */
-    // signOut: "/auth/signout",
-    // error: "/auth/error", // Error code passed in query string as ?error=
-    // verifyRequest: "/auth/verify-request", // (used for check email message)
-    // newUser: "/auth/new-user", // New users will be directed here on first sign in (leave the property out if not of interest)
   },
 };
 

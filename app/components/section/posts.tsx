@@ -1,6 +1,6 @@
 import { stripHtml } from "string-strip-html";
 import Image from "next/image";
-import Link from "next/link";
+/* import Link from "next/link"; */
 import {
   Card,
   CardContent,
@@ -32,24 +32,24 @@ export default function Posts(edges: any) {
                 key={id}
                 className="max-w-md overflow-hidden md:break-inside-avoid"
               >
-                <Link href={`/post/${slug}`}>
-                  <div className="max-h-44 overflow-hidden">
-                    <Image
-                      className="max-h-44 w-full object-cover transition hover:scale-110"
-                      alt={title}
-                      src={featuredImage.sourceUrl}
-                      height={parseFloat(featuredImage.mediaDetails.height)}
-                      width={parseFloat(featuredImage.mediaDetails.width)}
-                    />
-                  </div>
-                </Link>
+                {/*   <Link href={`/post/${slug}`}> */}
+                <div className="max-h-44 overflow-hidden">
+                  <Image
+                    className="max-h-44 w-full object-cover transition hover:scale-110"
+                    alt={title}
+                    src={featuredImage.sourceUrl}
+                    height={parseFloat(featuredImage.mediaDetails.height)}
+                    width={parseFloat(featuredImage.mediaDetails.width)}
+                  />
+                </div>
+                {/*    </Link> */}
                 <CardHeader className="relative flex flex-row items-center gap-4 pb-2">
                   <div className="flex flex-col">
-                    <Link href={`/post/${slug}`}>
-                      <CardTitle className="text-lg transition hover:text-primary">
-                        {title}
-                      </CardTitle>
-                    </Link>
+                    {/*   <Link href={`/post/${slug}`}> */}
+                    <CardTitle className="text-lg transition hover:text-primary">
+                      {title}
+                    </CardTitle>
+                    {/*   </Link> */}
                   </div>
                 </CardHeader>
 

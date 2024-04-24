@@ -68,7 +68,7 @@ export async function fetchGraphQL(
     }
     return json.data;
   } catch (error) {
-    console.log("ERRRROR", error);
+    return null;
   }
 }
 
@@ -96,4 +96,23 @@ export async function fetchREST({
     throw new Error("Failed to fetch REST API: ", json.errors[0]);
   }
   return json;
+}
+
+export async function testAPI() {
+  try {
+    const headers = getRequestHeaders();
+
+    const res = await fetch(`${REST_URL}`, {
+      headers,
+      method: "GET",
+    });
+
+    const json = await res.json();
+    if (json.errors) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
 }

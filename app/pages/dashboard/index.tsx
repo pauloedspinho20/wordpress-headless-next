@@ -35,13 +35,16 @@ import { IExpense } from "@/types/expenses";
 
 import { formatToEuro } from "@/utils/format";
 import Link from "next/link";
+import { testAPI } from "@/wp-api/api";
 
 interface Props {
+  testApi: boolean;
   defaultCategories: ICategory[];
   defaultExpenses: IExpense[];
 }
 
 export default function Dashboard({
+  testApi,
   defaultCategories,
   defaultExpenses,
 }: Props) {
@@ -51,6 +54,12 @@ export default function Dashboard({
   );
 
   const { data: session, status } = useSession();
+  const connectedWordpress = useGlobalStore(
+    (state) => state.connectedWordpress,
+  );
+  const setConnectedWordpress = useGlobalStore(
+    (state) => state.setConnectedWordpress,
+  );
   const expenses = useExpenseStore((state) => state.expenses);
   const updateCategories = useGlobalStore((state) => state.updateCategories);
   const [filterCategory, setFilterCategory] = useState<number | null>(null);
@@ -61,6 +70,9 @@ export default function Dashboard({
   const updateTotalOutcome = useExpenseStore(
     (state) => state.updateTotalOutcome,
   );
+  useEffect(() => {
+    setConnectedWordpress(testApi);
+  }, [testApi]);
 
   useEffect(() => {
     updateCategories(defaultCategories);
@@ -85,7 +97,7 @@ export default function Dashboard({
           <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
             <Header />
             <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-              <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+              <div className="grid auto-rows-max items-start gap-4 md:gap-5 lg:col-span-2">
                 <div className="grid gap-4 ">
                   <Card
                     className="sm:col-span-2"
@@ -167,6 +179,9 @@ export default function Dashboard({
 
                 <div className="flex items-center">
                   <div className="ml-auto flex items-center gap-2">
+                    {!connectedWordpress && (
+                      <small className="mr-3">Wordpress is not connected</small>
+                    )}
                     <FilterCategories
                       filterCategory={filterCategory}
                       onFilterCategoryChange={setFilterCategory}
@@ -213,11 +228,13 @@ export default function Dashboard({
 }
 
 export const getStaticProps: GetStaticProps = async () => {
+  const testApi = await testAPI();
   const defaultCategories = await getCategories();
   const defaultExpenses = await getAllExpensesWithSlug();
 
   return {
     props: {
+      testApi,
       defaultCategories,
       defaultExpenses,
     },

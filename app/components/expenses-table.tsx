@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { useExpenseStore } from "../hooks/useGlobalState";
+import { useGlobalStore, useExpenseStore } from "../hooks/useGlobalState";
 import { mutateExpense } from "@/wp-api/mutations/expenses";
 
 import { formatToEuro, getFormatedDate, getFormatedTime } from "@/utils/format";
@@ -37,7 +37,9 @@ interface Props {
 
 export default function ExpensesTable({ filterCategory }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-
+  const connectedWordpress = useGlobalStore(
+    (state) => state.connectedWordpress,
+  );
   /* Expenses state */
   const expenses = useExpenseStore((state) => state.expenses);
   const [filteredExpenses, setFilteredExpenses] =
@@ -75,10 +77,17 @@ export default function ExpensesTable({ filterCategory }: Props) {
     e.preventDefault();
 
     try {
-      const data = await mutateExpense({
-        databaseId,
-        requestType: "delete",
-      });
+      let data;
+      if (connectedWordpress) {
+        data = await mutateExpense({
+          databaseId,
+          requestType: "delete",
+        });
+      } else {
+        data = {
+          databaseId: databaseId,
+        };
+      }
 
       const updatedExpenses = expenses.filter(
         (d) => d.databaseId !== data.databaseId,

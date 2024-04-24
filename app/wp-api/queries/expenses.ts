@@ -1,5 +1,7 @@
 import { IExpense } from "../../types/expenses";
 import { fetchGraphQL, transformGraphQLResponse } from "../api";
+import { mockExpenses } from "../mock";
+
 /*
  * QUERIES - EXPENSES
  */
@@ -61,7 +63,10 @@ export async function getAllExpensesWithSlug() {
   if (data) {
     return transformGraphQLResponse(data.expenses, "expenses") as IExpense[];
   }
-  return [];
+  return transformGraphQLResponse(
+    mockExpenses.expenses,
+    "expenses",
+  ) as IExpense[];
 }
 
 /* Get current expense and the next ones */
