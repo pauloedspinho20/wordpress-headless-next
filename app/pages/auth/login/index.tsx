@@ -1,6 +1,6 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
+import { GetStaticProps } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
@@ -13,7 +13,13 @@ import AsideMenu from "@/components/layout/aside-munu";
 import Layout from "@/components/layout";
 import background from "./assets/background.jpg";
 
-export default function Login() {
+import { testAPI } from "@/wp-api/api";
+
+interface Props {
+  testApi: boolean;
+}
+
+export default function Login({ testApi }: Props) {
   const { data: session } = useSession();
 
   const [username, setUsername] = useState<string>("");
@@ -89,8 +95,16 @@ export default function Login() {
                 <p className="text-balance text-muted-foreground">
                   Enter your email below to login to your account.
                 </p>
-                <small>Test user: postlight</small>
-                <small>Test password: postlight</small>
+                {testApi ? (
+                  <>
+                    <small>Test user: postlight</small>
+                    <small>Test password: postlight</small>
+                  </>
+                ) : (
+                  <p className="text-primary">
+                    Wordpress is not connected. This form will not work.
+                  </p>
+                )}
               </div>
 
               {formError && (
@@ -135,7 +149,12 @@ export default function Login() {
                   variant="outline"
                   className="w-full"
                   onClick={handleLogin}
-                  disabled={!isUsernameValid || !isPasswordValid || submitting}
+                  disabled={
+                    !testApi ||
+                    !isUsernameValid ||
+                    !isPasswordValid ||
+                    submitting
+                  }
                 >
                   Login
                 </Button>
@@ -172,3 +191,14 @@ export default function Login() {
     </Layout>
   );
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+  const testApi = await testAPI();
+
+  return {
+    props: {
+      testApi,
+    },
+    revalidate: 10,
+  };
+};
