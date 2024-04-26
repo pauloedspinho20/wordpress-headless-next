@@ -40,10 +40,10 @@ export default function Expense({
   isDialogOpen = () => false,
   defaultType = "income",
 }: Props) {
-  /* Categories state */
   const connectedWordpress = useGlobalStore(
     (state) => state.connectedWordpress,
   );
+  /* Categories state */
   const categories = useGlobalStore((state) => state.categories);
   const updateCategories = useGlobalStore((state) => state.updateCategories);
   const [newCategory, setNewCategory] = useState<string>("");

@@ -1,11 +1,10 @@
 import { ChangeEvent, useState } from "react";
 import { GetStaticProps } from "next";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
-import AsideMenu from "@/components/layout/aside-munu";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import AsideMenu from "@/components/layout/aside-munu";
 import Layout from "@/components/layout";
 
 import background from "./assets/background.jpg";
@@ -43,18 +43,18 @@ export default function Login({ testApi }: Props) {
   const validateUsername = (usernameToValidate: string) => {
     setIsUsernameValid(usernameToValidate.length > 3);
   };
-
   const validatePassword = (passwordToValidate: string) => {
     setIsPasswordValid(passwordToValidate.length > 8);
   };
 
+  /* LOGIN USER */
   const handleLogin = async (e: any) => {
     e.preventDefault();
     setSubmitting(true);
     setFormError("");
     try {
       const req = await signIn("credentials", {
-        /* redirect: false, */
+        redirect: false,
         username: username,
         password: password,
         callbackUrl: "/dashboard",
@@ -129,22 +129,20 @@ export default function Login({ testApi }: Props) {
                 </CardHeader>
               </div>
 
-              {formError && (
-                <Alert variant="destructive">
-                  <ExclamationTriangleIcon className="h-4 w-4" />
-                  <AlertDescription>{formError}</AlertDescription>
-                </Alert>
-              )}
-
               <CardContent>
                 <div className="grid gap-6">
+                  {formError && (
+                    <Alert variant="destructive">
+                      <ExclamationTriangleIcon className="h-4 w-4" />
+                      <AlertDescription>{formError}</AlertDescription>
+                    </Alert>
+                  )}
                   <div className="grid gap-2">
-                    <Label className="font-bold" htmlFor="email">
-                      Email
-                    </Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       id="username"
-                      type="username"
+                      type="text"
+                      name="username"
                       value={username}
                       placeholder="e.g. paulopinho"
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -156,13 +154,12 @@ export default function Login({ testApi }: Props) {
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
-                      <Label className="font-bold" htmlFor="password">
-                        Password
-                      </Label>
+                      <Label htmlFor="password">Password</Label>
                     </div>
                     <Input
                       id="password"
                       type="password"
+                      name="password"
                       value={password}
                       placeholder="Your password"
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
