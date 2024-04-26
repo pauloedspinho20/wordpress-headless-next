@@ -7,31 +7,24 @@ import { fetchGraphQL } from "../api";
 
 /* Register user */
 
-export async function RegisterUser({
-  // TODO: Register user flow
-  email,
-  username,
-  password,
-  firstName,
-  lastName,
-}: IUser) {
+export async function RegisterUser({ username, email, password }: IUser) {
   const data = await fetchGraphQL(`
     mutation Register {
       registerUser(
-        input: {username: "${username}", firstName: "${firstName}", lastName: "${lastName}", password: "${password}", email: "${email}"}
+        input: {username: "${username}", password: "${password}", email: "${email}"}
       ) {
-        clientMutationId
-        user {
-        capabilities
-        databaseId
-        email
-        firstName
-        lastName
-        name
-        registeredDate
-        slug
-        userId
-        username
+          clientMutationId
+          user {
+          capabilities
+          databaseId
+          email
+          firstName
+          lastName
+          name
+          registeredDate
+          slug
+          userId
+          username
         }
       }
     }

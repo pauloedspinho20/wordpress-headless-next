@@ -2,10 +2,10 @@ import { ChangeEvent, useState } from "react";
 import { GetStaticProps } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import cn from "classnames";
 import { passwordStrength } from "check-password-strength";
-import { useSession, signIn, signOut } from "next-auth/react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,49 +16,21 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 
 import AsideMenu from "@/components/layout/aside-munu";
 import Layout from "@/components/layout";
 
 import background from "./assets/background.jpg";
 import { testAPI } from "@/wp-api/api";
+import { RegisterUser } from "@/wp-api/mutations/user";
 
-const passwordStrengthOptions = [
-  {
-    id: 0,
-    value: "Too weak",
-    minDiversity: 0,
-    minLength: 8,
-  },
-  {
-    id: 1,
-    value: "Weak",
-    minDiversity: 1,
-    minLength: 10,
-  },
-  {
-    id: 2,
-    value: "Medium",
-    minDiversity: 2,
-    minLength: 10,
-  },
-  {
-    id: 3,
-    value: "Strong",
-    minDiversity: 3,
-    minLength: 12,
-  },
-];
 interface Props {
   testApi: boolean;
 }
 
 export default function Signup({ testApi }: Props) {
-  const [firstName, setFirstName] = useState<string>("");
-  const [isFirstNameValid, setIsFirstNameValid] = useState<boolean>(false);
-  const [lastName, setLastName] = useState<string>("");
-  const [isLastNameValid, setIsLastNameValid] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>("");
+  const [isUsernameValid, setIsUsernameValid] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
@@ -71,17 +43,14 @@ export default function Signup({ testApi }: Props) {
   const [formError, setFormError] = useState<string>("");
 
   /* FORM VALIDATION */
-  const validateFirstName = (firstNameToValidate: string) => {
-    setIsPasswordValid(firstNameToValidate.length > 0);
-  };
-  const validateLastName = (lastNameToValidate: string) => {
-    setIsPasswordValid(lastNameToValidate.length > 0);
+  const validateUsername = (usernameToValidate: string) => {
+    setIsUsernameValid(usernameToValidate.length > 0);
   };
   const validateEmail = (emailToValidate: string) => {
     setIsEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToValidate));
   };
   const validatePassword = (passwordToValidate: string) => {
-    setIsPasswordValid(passwordToValidate.length > 8);
+    setIsPasswordValid(passwordToValidate.length >= 8);
   };
   const validatePasswordConfirm = (passwordConfirmToValidate: string) => {
     setIsPasswordValid(passwordConfirmToValidate === password);
@@ -93,21 +62,20 @@ export default function Signup({ testApi }: Props) {
     setSubmitting(true);
     setFormError("");
     try {
-      const req = await signIn("credentials", {
-        /* redirect: false, */
+      const data = await RegisterUser({
+        username: username,
         email: email,
         password: password,
-        callbackUrl: "/dashboard",
       });
 
-      if (req?.ok) {
-        setFirstName("");
-        setLastName("");
+      if (data) {
+        console.log("dataaaa", data);
+        setUsername("");
         setEmail("");
         setPassword("");
         setSent(true);
       } else {
-        setFormError(req?.error || "Please try again");
+        setFormError("Please try again");
       }
       setSubmitting(false);
     } catch (error: any) {
@@ -132,138 +100,175 @@ export default function Signup({ testApi }: Props) {
         <AsideMenu />
         <div className="relative w-full sm:h-screen sm:py-4 sm:pl-14">
           <div className="container flex h-full items-center justify-center py-12">
-            <Card>
-              <CardHeader>
-                <CardTitle>Register</CardTitle>
-                <CardDescription>
-                  Enter your information to create an account
-                </CardDescription>
-                {!testApi && (
-                  <p className="text-primary">
-                    Wordpress is not connected. This form will not work.
-                  </p>
-                )}
-              </CardHeader>
+            {/* New user */}
+            {sent ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Successfully registred!</CardTitle>
+                </CardHeader>
+                <CardContent>You can now use the platform</CardContent>
+                <CardFooter>
+                  <Link
+                    className={cn("w-full", buttonVariants())}
+                    href="/auth/login"
+                  >
+                    Login
+                  </Link>
+                </CardFooter>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Register</CardTitle>
+                  <CardDescription>
+                    Enter your information to create an account
+                  </CardDescription>
+                  {!testApi && (
+                    <p className="text-primary">
+                      Wordpress is not connected. This form will not work.
+                    </p>
+                  )}
+                </CardHeader>
 
-              <CardContent>
-                <div className="grid gap-6">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent>
+                  <div className="grid gap-6">
                     <div className="grid gap-2">
-                      {/* First name */}
-                      <Label htmlFor="first-name">First name</Label>
+                      {/* Username */}
+                      <Label htmlFor="username">Username</Label>
                       <Input
-                        id="first-name"
+                        id="username"
                         type="text"
-                        name="first-name"
-                        value={firstName}
-                        placeholder="e.g. Paulo"
+                        name="username"
+                        value={username}
+                        placeholder="e.g. paulopinho"
                         onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          setFirstName(e.target.value);
-                          validateFirstName(e.target.value);
+                          setUsername(e.target.value);
+                          validateUsername(e.target.value);
                         }}
                         required
                       />
                     </div>
-                    {/* Last name */}
+
+                    {/* Email */}
                     <div className="grid gap-2">
-                      <Label htmlFor="last-name">Last name</Label>
+                      <Label htmlFor="email">Email</Label>
                       <Input
-                        id="last-name"
-                        type="text"
-                        name="last-name"
-                        value={lastName}
-                        placeholder="e.g. Pinho"
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={email}
+                        placeholder="e.g. paulo.pinho@hireme.now"
                         onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          setLastName(e.target.value);
-                          validateLastName(e.target.value);
+                          setEmail(e.target.value);
+                          validateEmail(e.target.value);
                         }}
                         required
                       />
                     </div>
-                  </div>
-                  {/* Email */}
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={email}
-                      placeholder="e.g. paulo.pinho@hireme.now"
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        setEmail(e.target.value);
-                        validateEmail(e.target.value);
-                      }}
-                      required
-                    />
-                  </div>
-                  {/* Password */}
-                  <div className="grid gap-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="password">Password</Label>
-                    </div>
-                    <Input
-                      id="password"
-                      type="password"
-                      name="password"
-                      value={password}
-                      placeholder="Type a strong password"
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        setPassword(e.target.value);
-                        validatePassword(e.target.value);
-                      }}
-                      required
-                    />
-                  </div>
 
-                  {/* Confirm password */}
-                  {isPasswordValid && (
+                    {/* Password */}
+                    <div className="grid gap-2">
+                      <div className="flex items-center">
+                        <Label htmlFor="password">Password</Label>
+                      </div>
+                      <div className="relative flex">
+                        {password.length > 0 && (
+                          <div
+                            className={cn(
+                              "leading-0 absolute bottom-0 right-3 top-1/2 -translate-y-1/2 text-sm",
+                              {
+                                "text-red-500":
+                                  passwordStrength(password).id === 0,
+                                "text-red-300":
+                                  passwordStrength(password).id === 1,
+                                "text-green-300":
+                                  passwordStrength(password).id === 2,
+                                "text-green-600":
+                                  passwordStrength(password).id === 3,
+                              },
+                            )}
+                          >
+                            {passwordStrength(password).value}
+                          </div>
+                        )}
+
+                        <Input
+                          className="w-full pr-20"
+                          id="password"
+                          type="password"
+                          name="password"
+                          value={password}
+                          placeholder="Type a strong password"
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            setPassword(e.target.value);
+                            validatePassword(e.target.value);
+                          }}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Confirm password */}
                     <div className="grid gap-2">
                       <div className="flex items-center">
                         <Label htmlFor="password">Confirm password</Label>
                       </div>
-                      <Input
-                        type="password"
-                        id="password-confirm"
-                        name="password-confirm"
-                        value={passwordConfirm}
-                        placeholder="Confirm your password"
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          setPasswordConfirm(e.target.value);
-                          validatePasswordConfirm(e.target.value);
-                        }}
-                        required
-                      />
-                    </div>
-                  )}
-                  <Button
-                    type="submit"
-                    variant="default"
-                    className="w-full"
-                    onClick={handleRegister}
-                    disabled={
-                      !testApi ||
-                      !isFirstNameValid ||
-                      !isLastNameValid ||
-                      !isEmailValid ||
-                      !isPasswordValid ||
-                      submitting
-                    }
-                  >
-                    Register
-                  </Button>
-                </div>
-              </CardContent>
 
-              <CardFooter className="flex-col gap-4">
-                <div className="mt-4 text-center text-sm">
-                  Already have an account?{" "}
-                  <Link href="/login" className="underline">
-                    Login
-                  </Link>
-                </div>
-              </CardFooter>
-            </Card>
+                      <div className="relative flex">
+                        {password !== passwordConfirm && (
+                          <div
+                            className={cn(
+                              "leading-0 absolute bottom-0 right-3 top-1/2 -translate-y-1/2 text-sm text-red-500",
+                            )}
+                          >
+                            Not match
+                          </div>
+                        )}
+                        <Input
+                          className="w-full pr-20"
+                          type="password"
+                          id="password-confirm"
+                          name="password-confirm"
+                          value={passwordConfirm}
+                          placeholder="Confirm your password"
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            setPasswordConfirm(e.target.value);
+                            validatePasswordConfirm(e.target.value);
+                          }}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      variant="default"
+                      className="w-full"
+                      onClick={handleRegister}
+                      disabled={
+                        !testApi ||
+                        !isUsernameValid ||
+                        !isEmailValid ||
+                        !isPasswordValid ||
+                        isPasswordConfirmValid ||
+                        submitting
+                      }
+                    >
+                      Register
+                    </Button>
+                  </div>
+                </CardContent>
+
+                <CardFooter className="flex-col gap-4">
+                  <div className="mt-4 text-center text-sm">
+                    Already have an account?{" "}
+                    <Link href="/auth/login" className="underline">
+                      Login
+                    </Link>
+                  </div>
+                </CardFooter>
+              </Card>
+            )}
           </div>
         </div>
       </form>

@@ -138,13 +138,13 @@ export default function Login({ testApi }: Props) {
                     </Alert>
                   )}
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Username</Label>
                     <Input
                       id="username"
                       type="text"
                       name="username"
                       value={username}
-                      placeholder="e.g. paulopinho"
+                      placeholder="e.g. postlight"
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
                         setUsername(e.target.value);
                         validateUsername(e.target.value);
@@ -161,7 +161,7 @@ export default function Login({ testApi }: Props) {
                       type="password"
                       name="password"
                       value={password}
-                      placeholder="Your password"
+                      placeholder="e.g. postlight"
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
                         setPassword(e.target.value);
                         validatePassword(e.target.value);
