@@ -39,10 +39,14 @@ export default function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {status === "unauthenticated" && (
-          <Link href="/auth/login">
-            {" "}
-            <DropdownMenuItem>Login</DropdownMenuItem>
-          </Link>
+          <>
+            <Link href="/auth/login">
+              <DropdownMenuItem>Login</DropdownMenuItem>
+            </Link>
+            <Link href="/auth/register">
+              <DropdownMenuItem>Register</DropdownMenuItem>
+            </Link>
+          </>
         )}
         {status === "authenticated" && (
           <DropdownMenuItem onClick={() => signOut()}>Logout</DropdownMenuItem>
