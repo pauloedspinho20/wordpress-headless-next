@@ -140,6 +140,7 @@ export default function Expense({
           requestType: "create",
         });
       } else {
+        // Mock data
         data = {
           databaseId: Math.floor(Math.random() * 1101),
           title: title,
