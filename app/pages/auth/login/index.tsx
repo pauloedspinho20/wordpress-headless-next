@@ -1,18 +1,27 @@
 import { ChangeEvent, useState } from "react";
 import { GetStaticProps } from "next";
+import Link from "next/link";
 import Image from "next/image";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
+import AsideMenu from "@/components/layout/aside-munu";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import AsideMenu from "@/components/layout/aside-munu";
 import Layout from "@/components/layout";
-import background from "./assets/background.jpg";
 
+import background from "./assets/background.jpg";
 import { testAPI } from "@/wp-api/api";
 
 interface Props {
@@ -85,26 +94,39 @@ export default function Login({ testApi }: Props) {
 
   return (
     <Layout preview={false}>
+      <div className="position-absolute">
+        <Image
+          src={background.src}
+          alt="Login"
+          width={background.width}
+          height={background.height}
+          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        />
+      </div>
+      <div className="position-absolute z-index bg-blend-darken backdrop-blur"></div>
       <form method="post" action="/api/auth/callback/credentials">
         <AsideMenu />
-        <div className="w-full sm:py-4 sm:pl-14 lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-          <div className="flex items-center justify-center py-12">
-            <div className="mx-auto grid w-[350px] gap-6">
-              <div className="grid gap-2 text-center">
-                <h1 className="text-3xl font-bold">Login</h1>
-                <p className="text-balance text-muted-foreground">
-                  Enter your email below to login to your account.
-                </p>
-                {testApi ? (
-                  <>
-                    <small>Test user: postlight</small>
-                    <small>Test password: postlight</small>
-                  </>
-                ) : (
-                  <p className="text-primary">
-                    Wordpress is not connected. This form will not work.
-                  </p>
-                )}
+        <div className="relative w-full sm:h-screen sm:py-4 sm:pl-14">
+          <div className="container flex h-full items-center justify-center py-12">
+            <Card>
+              <div className="text-center">
+                <CardHeader>
+                  <CardTitle>Login</CardTitle>
+                  <CardDescription>
+                    {" "}
+                    Enter your email below to login to your account.
+                  </CardDescription>
+                  {testApi ? (
+                    <div className="flex">
+                      <small>Test user: postlight</small>
+                      <small>Test password: postlight</small>
+                    </div>
+                  ) : (
+                    <p className="text-primary">
+                      Wordpress is not connected. This form will not work.
+                    </p>
+                  )}
+                </CardHeader>
               </div>
 
               {formError && (
@@ -113,78 +135,78 @@ export default function Login({ testApi }: Props) {
                   <AlertDescription>{formError}</AlertDescription>
                 </Alert>
               )}
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="username"
-                    type="username"
-                    value={username}
-                    placeholder="e.g. paulopinho"
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      setUsername(e.target.value);
-                      validateUsername(e.target.value);
-                    }}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+
+              <CardContent>
+                <div className="grid gap-6">
+                  <div className="grid gap-2">
+                    <Label className="font-bold" htmlFor="email">
+                      Email
+                    </Label>
+                    <Input
+                      id="username"
+                      type="username"
+                      value={username}
+                      placeholder="e.g. paulopinho"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        setUsername(e.target.value);
+                        validateUsername(e.target.value);
+                      }}
+                      required
+                    />
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    placeholder="Type a strong password"
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      setPassword(e.target.value);
-                      validatePassword(e.target.value);
-                    }}
-                    required
-                  />
+                  <div className="grid gap-2">
+                    <div className="flex items-center">
+                      <Label className="font-bold" htmlFor="password">
+                        Password
+                      </Label>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      placeholder="Your password"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        setPassword(e.target.value);
+                        validatePassword(e.target.value);
+                      }}
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="default"
+                    className="w-full"
+                    onClick={handleLogin}
+                    disabled={
+                      !testApi ||
+                      !isUsernameValid ||
+                      !isPasswordValid ||
+                      submitting
+                    }
+                  >
+                    Login
+                  </Button>
                 </div>
-                <Button
-                  type="submit"
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleLogin}
-                  disabled={
-                    !testApi ||
-                    !isUsernameValid ||
-                    !isPasswordValid ||
-                    submitting
-                  }
+              </CardContent>
+
+              <CardFooter>
+                <div className="mt-4 text-center text-sm">
+                  Don&apos;t have an account?{" "}
+                  <Link href="/auth/register" className="underline">
+                    Register
+                  </Link>
+                </div>
+              </CardFooter>
+
+              {/*   <div className="text-center text-sm">
+                <Link
+                  href="/auth/forgot-password"
+                  className="ml-auto inline-block text-sm underline"
                 >
-                  Login
-                </Button>
-              </div>
-
-              {/*      <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline">
-                Sign up
-              </Link>
-            </div> */}
-
-              {/*  <div className="text-center text-sm">
-              <Link
-                href="/forgot-password"
-                className="ml-auto inline-block text-sm underline"
-              >
-                Forgot your password?
-              </Link>
-            </div> */}
-            </div>
-          </div>
-          <div className="hidden bg-muted lg:block">
-            <Image
-              src={background.src}
-              alt="Login"
-              width={background.width}
-              height={background.height}
-              className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-            />
+                  Forgot your password?
+                </Link>
+              </div> */}
+            </Card>
           </div>
         </div>
       </form>
