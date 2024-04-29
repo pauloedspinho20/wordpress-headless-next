@@ -4,6 +4,12 @@ export interface ICategory extends INodeWP {
   selected?: boolean;
 }
 
+export interface ITag extends INodeWP {
+  count?: number;
+  parent?: { node: INodeWP };
+  selected?: boolean;
+}
+
 export interface IPost extends INodeWP {
   author: IAuthor;
   title: string;
@@ -17,5 +23,6 @@ export interface IPost extends INodeWP {
       width: string;
     };
   };
+  tags: ITag[];
   categories: ICategory[];
 }

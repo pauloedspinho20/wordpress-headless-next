@@ -6,7 +6,7 @@
       "parser": "@typescript-eslint/parser"
     }
   ],
-  "plugins": ["@stylistic"],
+  "plugins": ["@stylistic", "risxss"],
   "rules": {
     "@stylistic/arrow-parens": ["error", "as-needed"],
     "import/no-unresolved": [2, { "caseSensitive": false }],
@@ -25,7 +25,8 @@
         "allowSamePrecedence": true
       }
     ],
-    "no-param-reassign": 0
+    "no-param-reassign": 0,
+    "risxss/catch-potential-xss-react": "error"
   },
   "settings": {
     "tailwindcss": {}

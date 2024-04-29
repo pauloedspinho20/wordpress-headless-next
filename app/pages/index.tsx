@@ -7,7 +7,7 @@ import Posts from "@/components/section/posts";
 import AsideMenu from "@/components/layout/aside-munu";
 import Layout from "@/components/layout";
 import Footer from "@/components/layout/footer";
-import { ScrollToTop } from "@/components/scroll-to-top";
+import ScrollToTop from "@/components/scroll-to-top";
 
 import { getAllPostsForHome } from "../wp-api/queries/posts";
 

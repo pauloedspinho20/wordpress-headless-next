@@ -69,7 +69,6 @@ export default function Signup({ testApi }: Props) {
       });
 
       if (data) {
-        console.log("dataaaa", data);
         setUsername("");
         setEmail("");
         setPassword("");

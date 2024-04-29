@@ -90,22 +90,6 @@ To import data from a mysqldump with `mysql`, run:
     docker exec db-headless mysql -hdb-headless -uwp_headless -pwp_headless wp_headless < example.sql
     docker exec wp-headless wp search-replace https://example.com http://localhost:8080
 
-## Import Data from Another WordPress Installation
-
-You can use a plugin called All In On to connect to another WordPress installation and import data from it. (A Pro license will be required.)
-
-To do so, first set `MIGRATEDB_LICENSE` & `MIGRATEDB_FROM` in `.env` and recreate containers to enact the changes.
-
-    docker-compose up -d
-
-Then run the import script:
-
-    docker exec wp-headless migratedb_import
-
-If you need more advanced functionality check out the available WP-CLI commands:
-
-    docker exec wp-headless wp help migratedb
-
 ## Extend the REST and GraphQL APIs
 
 At this point you can start setting up custom fields in the WordPress admin, and if necessary, creating [custom REST API endpoints](https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/) in the Postlight Headless WordPress Starter theme.

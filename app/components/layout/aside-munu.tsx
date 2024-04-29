@@ -1,11 +1,11 @@
 "use client";
+
 import cn from "classnames";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Home, Calculator, Menu, LibraryBig } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-import { Home, Calculator, PanelLeft, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Tooltip,
@@ -28,6 +28,11 @@ export const menuItems = [
     value: "/dashboard",
     icon: <Calculator className="h-5 w-5" />,
   },
+  {
+    label: "Posts",
+    value: "/posts",
+    icon: <LibraryBig className="h-5 w-5" />,
+  },
 ];
 
 export default function AsideMenu() {
@@ -37,13 +42,15 @@ export default function AsideMenu() {
     <TooltipProvider>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
         <Sheet>
-          <SheetTrigger asChild>
-            <Button size="icon" variant="outline" className="sm:hidden">
-              <PanelLeft className="h-5 w-5" />
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="sm:max-w-xs">
+          <div className="flex w-full justify-end">
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline" className="sm:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+          </div>
+          <SheetContent side="right" className="sm:max-w-xs">
             <nav className="grid gap-6 text-lg font-medium">
               {menuItems?.map((item) => (
                 <Link
