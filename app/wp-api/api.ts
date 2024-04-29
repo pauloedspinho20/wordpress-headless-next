@@ -4,9 +4,9 @@ const GRAPHQL_URL = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL;
 const REST_URL = process.env.NEXT_PUBLIC_WORDPRESS_REST_URL;
 
 export function transformGraphQLResponse(data: any, type: string) {
-  return data.edges.map((edge: any) => {
+  return data?.edges?.map((edge: any) => {
     const { node } = edge;
-    const { author, categories, featuredImage, ...rest } = node;
+    const { author, categories, tags, featuredImage, ...rest } = node;
 
     switch (type) {
       case "posts":
@@ -16,6 +16,7 @@ export function transformGraphQLResponse(data: any, type: string) {
           categories: categories?.edges?.map(({ node }: any) => node),
           featuredImage: featuredImage?.node,
           formatedDate: getFormatedDate(dateStringToDate(node.date)),
+          tags: tags?.edges?.map(({ node }: any) => node),
         };
       case "expenses":
         return {

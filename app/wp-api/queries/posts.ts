@@ -7,14 +7,93 @@ import { mockCategories } from "../mock";
  * QUERIES - POSTS
  */
 
+const categoryFields = `
+  fragment CategoryFields on Category {
+    databaseId
+    id
+    count
+    name
+    parent {
+      node {
+        databaseId
+        id
+        name
+        slug
+      }
+    }
+    slug
+  }
+`;
+
+const authorFields = `
+  fragment AuthorFields on User {
+    databaseId
+    id
+    name
+    firstName
+    lastName
+    avatar {
+      url
+    }
+  }
+`;
+
+const postFields = `
+  fragment PostFields on Post {
+    databaseId
+    id
+    title
+    slug
+    content
+    excerpt
+    date
+    status
+    featuredImage {
+      node {
+        sourceUrl
+        sizes
+        mediaDetails {
+          height
+          width
+        }
+      }
+    }
+    author {
+      node {
+        ...AuthorFields
+      }
+    }
+    categories {
+      edges {
+        node {
+          id
+          databaseId
+          slug
+          name
+        }
+      }
+    }
+    tags {
+      edges {
+        node {
+          id
+          databaseId
+          slug
+          name
+        }
+      }
+    }
+  }
+`;
+
 export async function getPreviewPost(id: number, idType = "DATABASE_ID") {
   const data = await fetchGraphQL(
     `
+    ${postFields}
+
     query PreviewPost($id: ID!, $idType: PostIdType!) {
       post(id: $id, idType: $idType) {
-        databaseId
-        slug
-        status
+        ...PostFields
       }
     }`,
     {
@@ -27,7 +106,7 @@ export async function getPreviewPost(id: number, idType = "DATABASE_ID") {
 export async function getAllPostsWithSlug() {
   const data = await fetchGraphQL(`
     {
-      posts(first: 10000) {
+      posts(first: 20) {
         edges {
           node {
             slug
@@ -40,99 +119,41 @@ export async function getAllPostsWithSlug() {
 }
 
 export async function getAllPosts() {
-  const data = await fetchGraphQL(`
-    fragment AuthorFields on User {
-        databaseId
-        id
-        name
-        firstName
-        lastName
-        avatar {
-          url
-        }
-      }
+  const data = await fetchGraphQL(
+    `
+    ${authorFields}
+    ${postFields}
 
-      fragment PostFields on Post {
-        databaseId
-        id
-        title
-        slug
-        content
-        excerpt
-        date
-        author {
+    query GetAllPosts {
+      posts(first: 10000) {
+        edges {
           node {
-            ...AuthorFields
-          }
-        }
-        categories {
-          edges {
-            node {
-              id
-              databaseId
-              slug
-              name
-            }
+            ...PostFields
           }
         }
       }
+    }
+  `,
+  );
 
-      query GetAllPosts {
-          posts(first: 10000) {
-            edges {
-              node {
-                ...PostFields
-              }
-            }
-          }
-        }
-  `);
-  return data?.posts;
+  if (data) {
+    return transformGraphQLResponse(data?.posts, "posts") as IPost;
+  }
+
+  return null;
 }
 
 export async function getAllPostsForHome(preview: boolean) {
   const data = await fetchGraphQL(
     `
+    ${authorFields}
+    ${postFields}
+    
     query AllPosts {
-      posts(first: 8, where: { orderby: { field: DATE, order: DESC } }) {
+      posts(first: 3, where: { orderby: { field: DATE, order: DESC } }) {
         edges {
           node {
-            id
-            databaseId
-            title
-            excerpt
-            slug
-            date
-            featuredImage {
-              node {
-                sourceUrl
-                sizes
-                mediaDetails {
-                  height
-                  width
-                }
-              }
-            }
-            author {
-              node {
-                name
-                firstName
-                lastName
-                avatar {
-                  url
-                }
-              }
-            }
-            categories {
-              edges {
-                node {
-                  id
-                  databaseId
-                  slug
-                  name
-                }
-              }
-            }
+            ...PostFields
           }
         }
       }
@@ -154,7 +175,7 @@ export async function getAllPostsForHome(preview: boolean) {
 }
 
 export async function getPostAndMorePosts(
-  slug: string,
+  slug: string | undefined | string[],
   preview: boolean,
   previewData: any,
 ) {
@@ -168,44 +189,9 @@ export async function getPostAndMorePosts(
   const isRevision = isSamePost && postPreview?.status === "publish";
   const data = await fetchGraphQL(
     `
-    fragment AuthorFields on User {
-      name
-      firstName
-      lastName
-      avatar {
-        url
-      }
-    }
-    fragment PostFields on Post {
-      title
-      excerpt
-      slug
-      date
-      featuredImage {
-        node {
-          sourceUrl
-        }
-      }
-      author {
-        node {
-          ...AuthorFields
-        }
-      }
-      categories {
-        edges {
-          node {
-            name
-          }
-        }
-      }
-      tags {
-        edges {
-          node {
-            name
-          }
-        }
-      }
-    }
+    ${authorFields}
+    ${postFields}
+
     query PostBySlug($id: ID!, $idType: PostIdType!) {
       post(id: $id, idType: $idType) {
         ...PostFields
@@ -232,7 +218,7 @@ export async function getPostAndMorePosts(
             : ""
         }
       }
-      posts(first: 3, where: { orderby: { field: DATE, order: DESC } }) {
+      posts(first: 4, where: { orderby: { field: DATE, order: DESC } }) {
         edges {
           node {
             ...PostFields
@@ -249,30 +235,45 @@ export async function getPostAndMorePosts(
     },
   );
 
-  // Draft posts may not have an slug
-  if (isDraft) data.post.slug = postPreview.id;
-  // Apply a revision (changes in a published post)
-  if (isRevision && data.post.revisions) {
-    const revision = data.post.revisions.edges[0]?.node;
+  if (data) {
+    const post = data?.post;
 
-    if (revision) Object.assign(data.post, revision);
-    delete data.post.revisions;
+    // Draft posts may not have an slug
+    if (isDraft) post.slug = postPreview.id;
+    // Apply a revision (changes in a published post)
+    if (isRevision && post.revisions) {
+      const revision = post.revisions.edges[0]?.node;
+
+      if (revision) Object.assign(post, revision);
+      delete post.revisions;
+    }
+
+    // Filter out the main post
+    const posts = data.posts?.edges?.filter(
+      ({ node }: any) => node.slug !== slug,
+    );
+    const transformedPosts = transformGraphQLResponse(
+      { edges: posts },
+      "posts",
+    );
+    // If there are still 3 posts, remove the last one
+    if (transformedPosts.length > 3) transformedPosts.pop();
+
+    return {
+      post: transformGraphQLResponse({ edges: [{ node: post }] }, "posts")?.[0],
+      posts: transformedPosts,
+    };
   }
 
-  // Filter out the main post
-  data.posts.edges = data.posts.edges.filter(
-    ({ node }: any) => node.slug !== slug,
-  );
-  // If there are still 3 posts, remove the last one
-  if (data.posts.edges.length > 2) data.posts.edges.pop();
-
-  return data;
+  return null;
 }
 
 /* Get all categories */
 export async function getCategories() {
   const data = await fetchGraphQL(
     `
+    ${categoryFields}
+
     query Categories {
       categories(first: 10000) {
         pageInfo {
@@ -280,19 +281,7 @@ export async function getCategories() {
           hasPreviousPage
         }
         nodes {
-          databaseId
-          id
-          count
-          name
-          parent {
-            node {
-              databaseId
-              id
-              name
-              slug
-            }
-          }
-          slug
+          ...CategoryFields
         }
       }
     }`,
